@@ -36,27 +36,33 @@
   /* ✅ Helper function to filter data before saving */
   function filter_data() {
     var ignore_columns = ['raw_rt', 'trial_type', 'first_stimulus', 'second_stimulus', 'onset_of_first_stimulus',
-                          'onset_of_second_stimulus', 'key_press', 'correct_response', 'trial_index', 'internal_node_id'];
-    var rows = { trial_type: 'custom-stop-signal-plugin' }; 
-    var selected_data = jsPsych.data.get().filter(rows).ignore(ignore_columns);
+      'onset_of_second_stimulus', 'key_press', 'correct_response', 'trial_index', 'internal_node_id'
+    ];
     
-    return selected_data.values().map(trial => ({
-      participant_id: participantId,  // ✅ Attach Participant ID
-      trial_number: trial.trial_i,
-      block_i: trial.block_i,
-      stim: trial.stim,
-      signal_flag: trial.signal ? 1 : 0, 
-      SSD: trial.SSD,
-      response: trial.response,
-      rt: trial.rt,
-      correct: trial.correct ? 1 : 0,
-      focus: trial.focus,
-      fullscreen: trial.Fullscreen,
-      time_elapsed: trial.time_elapsed,
-      window_resolution: trial.window_resolution
-    }));
-  }  // ✅ Corrected: Closing the function properly
+    var rows = { trial_type: 'custom-stop-signal-plugin' };
+    var selected_data = jsPsych.data.get().filter(rows).ignore(ignore_columns);
+    var d = selected_data.values(); // Get trial data
 
+    // Define column order
+    var arr = ['participant_id', 'block_i', 'trial_i', 'stim', 'signal', 'SSD', 'response', 'rt', 'correct',
+      'focus', 'Fullscreen', 'time_elapsed', 'window_resolution'];
+
+    new_arr = []; // Array for formatted data
+
+    for (var i = 0; i < d.length; i++) {
+        var obj = d[i]; // Get one trial's data
+        var new_obj = { participant_id: participantId }; // Include participant ID
+
+        arr.forEach(function(item) { 
+            new_obj[item] = obj[item]; 
+        });
+
+        new_arr.push(new_obj); // Store formatted trial data
+    }
+
+    return new_arr; // Return structured data
+}
+  
   /* ✅ Define function to save data via fetch API */
   function saveStopITData() {
     console.log("✅ Saving STOP-IT Data...");
