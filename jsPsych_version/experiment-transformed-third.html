@@ -113,9 +113,14 @@ Added `display_element`
 </body>
 
 <script>
-  /*
-   * Helper functions for saving data
-   */
+  
+     /* ✅ Extract Participant ID from URL */
+  const urlParams = new URLSearchParams(window.location.search);
+  const participantId = urlParams.get('participantId') || "default_id"; 
+
+  console.log("✅ Participant ID:", participantId);
+
+  /* ✅ Helper function to filter data before saving */
   function filter_data() {
     var ignore_columns = ['raw_rt', 'trial_type', 'first_stimulus', 'second_stimulus', 'onset_of_first_stimulus',
       'onset_of_second_stimulus', 'key_press', 'correct_response', 'trial_index', 'internal_node_id'
@@ -127,60 +132,45 @@ Added `display_element`
     // the next piece of codes orders the columns of the data file
     var d = selected_data.values() // get the data values
     // make an array that specifies the order of the object properties
-    var arr = ['block_i', 'trial_i', 'stim', 'signal', 'SSD', 'response', 'rt', 'correct',
-      'focus', 'Fullscreen', 'time_elapsed', 'window_resolution'
-    ];
-    new_arr = [] // we will fill this array with the ordered data
-    function myFunction(item) { // this is function is called in the arr.forEach call below
-      new_obj[item] = obj[item]
-      return new_obj
-    }
-    // do it for the whole data array
-    for (i = 0; i < d.length; i++) {
-      obj = d[i]; // get one row of data
-      new_obj = {};
-      arr.forEach(myFunction) // for each element in the array run my function
-      selected_data.values()[i] = new_obj; // insert the ordered values back in the jsPsych.data object
-    }
-    return selected_data;
-  }
+    return selected_data.values().map(trial => ({
+      participant_id: participantId,  // ✅ Attach Participant ID
+      trial_number: trial.trial_i,
+      block_i: trial.block_i,
+      stim: trial.stim,
+      signal_flag: trial.signal ? 1 : 0, 
+      SSD: trial.SSD,
+      response: trial.response,
+      rt: trial.rt,
+      correct: trial.correct ? 1 : 0,
+      focus: trial.focus,
+      fullscreen: trial.Fullscreen,
+      time_elapsed: trial.time_elapsed,
+      window_resolution: trial.window_resolution
+    }));
 
-  /* Change 5: Defining save functions using Dropbox API */
-  function save_data(dropbox_access_token, save_filename) {
-    console.log("Save data function called.");
-    var selected_data = filter_data();
-    try {
-      var dbx = new Dropbox.Dropbox({
-        fetch: fetch,
-        accessToken: dropbox_access_token
-      });
-      dbx.filesUpload({
-          path: save_filename,
-          mode: 'overwrite',
-          mute: true,
-          contents: selected_data.csv()
-        })
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (error) {
-          console.error(error);
-        });
-    } catch (err) {
-      console.log("Save data function failed.", err);
-    }
-  }
+  /* ✅ Change 5: Define new function to save data via fetch API */
+function saveStopITData() {
+    console.log("✅ Saving STOP-IT Data...");
 
-  /* Change 4: Defining necessary variables for saving the results */
-  // experimental session-defining variables
-  var task_id = "STOP-IT";
-  var sbj_id = "test01";
+    var requestBody = filter_data(); // Extract filtered data
 
-  // YOU MUST GET YOUR OWN DROPBOX ACCESS TOKEN
-  var dropbox_access_token = '<PUT YOUR Dropbox ACCESS TOKEN HERE>';
+    // Debugging: Check data before sending
+    console.log("📊 Filtered STOP-IT Data:", requestBody);
+    console.table(requestBody);  // Nice table in console for debugging
 
-  // my preference is to include the task and sbj_id in the file name
-  var save_filename = '/' + task_id + '/' + task_id + '_' + sbj_id + '.csv';
+    fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+    })
+    .then(response => response.text())
+    .then(data => console.log("✅ Server Response:", data))
+    .catch(error => console.error("❌ Error saving STOP-IT response:", error));
+}
+
+// experimental session-defining variables
+var task_id = "STOP-IT";
+var sbj_id = participantId; // Replace hardcoded ID with extracted ID
 
   // push all the procedures, which are defined in stop-it_main.js to the overall timeline
   var timeline = []; // this array stores the events we want to run in the experiment
@@ -228,14 +218,14 @@ Added `display_element`
       min_height: minHeight
     },
 
-    /* Change 6: Sending the results file upon completion */
-    on_finish: function () {
-      save_data(dropbox_access_token, save_filename);
-    },
+       /* Change 6: Sending the results file upon completion */ 
+       on_finish: function () {
+    console.log("✅ Experiment finished, calling saveStopITData()");
+    saveStopITData();
+}
+, 
+  
+  }) </script> 
 
-  })
-</script>
+</html>this: 
 
-
-
-</html>
