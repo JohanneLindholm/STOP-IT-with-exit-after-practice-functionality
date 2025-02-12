@@ -6,35 +6,6 @@
  * 
  **/
 
-// ✅ Retrieve Participant ID from Qualtrics JavaScript or URL
-var participantId = null;
-
-// ✅ Try Qualtrics first
-try {
-    participantId = window.parent.Qualtrics.SurveyEngine.getEmbeddedData("participant_id");
-} catch (error) {
-    console.warn("Qualtrics embedded data not available:", error);
-}
-
-// ✅ Retrieve Participant ID from URL
-const urlParams = new URLSearchParams(window.location.search);
-var participantId = urlParams.get("participant_id");
-
-if (!participantId) {
-    participantId = "guest_" + Date.now(); // Fallback if ID is missing
-}
-
-console.log("✅ STOP-IT Final Assigned Participant ID:", participantId);
-
-}
-
-// ✅ If still missing, generate a fallback ID
-if (!participantId) {
-    participantId = "guest_" + Date.now();
-}
-
-// ✅ Debugging: Confirm the final assigned ID
-console.log("✅ STOP-IT Final Assigned Participant ID:", participantId);
 
 
 /*
@@ -475,58 +446,3 @@ if (fullscreen) {
 var end_procedure = {
     timeline: end_timeline, // here, you could add questionnaire trials etc...
 };
-
-/* #########################################################################
-    ✅ Add saveStopITData() Here Before the Experiment Starts
-#########################################################################*/
-function saveStopITData() {
-    console.log("Saving STOP-IT Data...");
-
-    var requestBody = jsPsych.data.get().values().map(trial => ({
-        participant_id: participantId,  // ✅ Ensure correct participant ID
-        trial_number: trial.trial_i,
-        block_i: trial.block_i,
-        trial_i: trial.trial_i,
-        stim: trial.stim,
-        signal_flag: trial.signal ? 1 : 0,
-        SSD: trial.SSD,
-        response: trial.response,
-        rt: trial.rt,
-        correct: trial.correct ? 1 : 0,
-        focus: trial.focus,
-        fullscreen: trial.Fullscreen,
-        time_elapsed: trial.time_elapsed,
-        window_resolution: trial.window_resolution
-    }));
-
-    // Debugging: Ensure correct ID is attached
-    console.log("Filtered STOP-IT Data:", requestBody);
-
-    fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-    })
-    .then(response => response.text())
-    .then(data => console.log("Server Response:", data))
-    .catch(error => console.error("Error saving STOP-IT response:", error));
-}
-
-/* #########################################################################
-    ✅ Manually Execute Experiment (Old jsPsych Version)
-#########################################################################*/
-
-// ✅ Define the full timeline manually
-var experiment_timeline = [start_procedure, block_procedure, end_procedure];
-
-// ✅ Run the experiment (OLD jsPsych style)
-jsPsych.init({
-    timeline: experiment_timeline
-});
-
-// ✅ Manually trigger `saveStopITData()` when the experiment ends
-jsPsych.data.addProperties({ participant_id: participantId }); // ✅ Ensure participant ID is attached
-jsPsych.on('experiment-end', function () {
-    console.log("Experiment finished, calling saveStopITData()");
-    saveStopITData(); // ✅ Call function at the very end
-});
