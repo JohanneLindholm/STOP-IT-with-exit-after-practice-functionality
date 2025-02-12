@@ -6,17 +6,6 @@
  * 
  **/
 
-// ✅ Retrieve Participant ID from URL
-const urlParams = new URLSearchParams(window.location.search);
-var participantId = urlParams.get("participant_id");
-
-if (!participantId) {
-    participantId = "guest_" + Date.now(); // Fallback if ID is missing
-}
-
-console.log("✅ STOP-IT Final Assigned Participant ID:", participantId);
-
-
 /*
  * Generic task variables for Qualtrics
  */
