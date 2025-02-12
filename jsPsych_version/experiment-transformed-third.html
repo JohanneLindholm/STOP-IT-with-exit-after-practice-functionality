@@ -29,6 +29,12 @@
 
 <script>
 
+  // ✅ Extract Participant ID from URL (Declare it only once)
+var urlParams = new URLSearchParams(window.location.search);
+var participantId = urlParams.get("participantId") || "guest_" + Date.now();
+
+console.log("✅ Assigned Participant ID:", participantId);
+
   /* ✅ Helper function to filter data before saving */
   function filter_data() {
     var ignore_columns = ['raw_rt', 'trial_type', 'first_stimulus', 'second_stimulus', 'onset_of_first_stimulus',
