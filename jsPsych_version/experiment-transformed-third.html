@@ -29,17 +29,16 @@
 
 <script>
 
-  // ✅ Prevent duplicate declaration of `urlParams`
-if (typeof window.urlParams === "undefined") {  
+  // ✅ Ensure `urlParams` is only defined once globally
+if (!window.hasOwnProperty("urlParams")) {  
     window.urlParams = new URLSearchParams(window.location.search);
-    window.participantId = urlParams.get("participantId") || "guest_" + Date.now();
+    window.participantId = window.urlParams.get("participantId") || "guest_" + Date.now();
     console.log("✅ Assigned Participant ID:", window.participantId);
-} else {
-    console.log("⚠️ `urlParams` already exists, skipping re-declaration.");
 }
 
-// ✅ Use participantId normally throughout the script
+// ✅ Use participantId safely throughout the script
 var participantId = window.participantId;
+
 
 
   /* ✅ Helper function to filter data before saving */
