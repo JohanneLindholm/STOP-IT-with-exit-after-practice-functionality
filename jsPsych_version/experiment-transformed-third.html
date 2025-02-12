@@ -30,9 +30,8 @@
 <script>
   /* ✅ Extract Participant ID from URL */
   const urlParams = new URLSearchParams(window.location.search);
-  const participantId = urlParams.get('participantId') || "default_id"; 
-
-  console.log("✅ Participant ID:", participantId);
+  var participantId = urlParams.get('participantId') || "guest_" + Math.random().toString(36).slice(-6);
+  console.log("✅ Assigned Participant ID:", participantId);
 
   /* ✅ Helper function to filter data before saving */
   function filter_data() {
@@ -63,20 +62,23 @@
     console.log("✅ Saving STOP-IT Data...");
 
     var requestBody = filter_data(); // Extract filtered data
-
-    // Debugging: Check data before sending
     console.log("📊 Filtered STOP-IT Data:", requestBody);
-    console.table(requestBody);  // Nice table in console for debugging
+    
+    // Convert to CSV if needed
+    var csvData = jsPsych.data.get().csv();
 
     fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
+        headers: { "Content-Type": "application/json" }, // Change to "text/csv" if needed
+        body: JSON.stringify({ 
+            participant_id: participantId, 
+            data: csvData // Sending CSV instead of JSON object
+        })
     })
     .then(response => response.text())
     .then(data => console.log("✅ Server Response:", data))
     .catch(error => console.error("❌ Error saving STOP-IT response:", error));
-  }
+}
 
   /* ✅ Define Experiment */
   var task_id = "STOP-IT";
