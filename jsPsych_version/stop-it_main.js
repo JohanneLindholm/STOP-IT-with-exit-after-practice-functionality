@@ -16,10 +16,16 @@ try {
     console.warn("Qualtrics embedded data not available:", error);
 }
 
-// ✅ Second, try to get it from the URL
+// ✅ Retrieve Participant ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+var participantId = urlParams.get("participant_id");
+
 if (!participantId) {
-    const urlParams = new URLSearchParams(window.location.search);
-    participantId = urlParams.get("participant_id");
+    participantId = "guest_" + Date.now(); // Fallback if ID is missing
+}
+
+console.log("✅ STOP-IT Final Assigned Participant ID:", participantId);
+
 }
 
 // ✅ If still missing, generate a fallback ID
@@ -514,7 +520,9 @@ function saveStopITData() {
 var experiment_timeline = [start_procedure, block_procedure, end_procedure];
 
 // ✅ Run the experiment (OLD jsPsych style)
-jsPsych.run(experiment_timeline);
+jsPsych.init({
+    timeline: experiment_timeline
+});
 
 // ✅ Manually trigger `saveStopITData()` when the experiment ends
 jsPsych.data.addProperties({ participant_id: participantId }); // ✅ Ensure participant ID is attached
