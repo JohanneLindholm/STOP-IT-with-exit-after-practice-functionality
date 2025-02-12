@@ -29,19 +29,17 @@
 
 <script>
 
-  // ✅ Extract Participant ID from URL (Declare it only once)
-var urlParams = new URLSearchParams(window.location.search);
-var participantId = urlParams.get("participantId") || "guest_" + Date.now();
-console.log("✅ Assigned Participant ID:", participantId);
-
   // ✅ Prevent duplicate declaration of `urlParams`
-if (typeof urlParams === "undefined") {  
-    var urlParams = new URLSearchParams(window.location.search);
-    var participantId = urlParams.get("participantId") || "guest_" + Date.now();
-    console.log("✅ Assigned Participant ID:", participantId);
+if (typeof window.urlParams === "undefined") {  
+    window.urlParams = new URLSearchParams(window.location.search);
+    window.participantId = urlParams.get("participantId") || "guest_" + Date.now();
+    console.log("✅ Assigned Participant ID:", window.participantId);
 } else {
     console.log("⚠️ `urlParams` already exists, skipping re-declaration.");
 }
+
+// ✅ Use participantId normally throughout the script
+var participantId = window.participantId;
 
 
   /* ✅ Helper function to filter data before saving */
