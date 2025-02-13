@@ -113,7 +113,19 @@ Added `display_element`
 </body>
 
 <script>
-  /*
+
+// ✅ Ensure `urlParams` is only defined once globally
+if (!window.hasOwnProperty("urlParams")) {  
+    window.urlParams = new URLSearchParams(window.location.search);
+    window.participantId = window.urlParams.get("participantId") || "guest_" + Date.now();
+    console.log("✅ Assigned Participant ID:", window.participantId);
+}
+
+// ✅ Use participantId safely throughout the script
+var participantId = window.participantId;
+
+     
+/*
    * Helper functions for saving data
    */
   function filter_data() {
@@ -145,42 +157,33 @@ Added `display_element`
     return selected_data;
   }
 
-  /* Change 5: Defining save functions using Dropbox API */
-  function save_data(dropbox_access_token, save_filename) {
-    console.log("Save data function called.");
-    var selected_data = filter_data();
-    try {
-      var dbx = new Dropbox.Dropbox({
-        fetch: fetch,
-        accessToken: dropbox_access_token
-      });
-      dbx.filesUpload({
-          path: save_filename,
-          mode: 'overwrite',
-          mute: true,
-          contents: selected_data.csv()
+   /* ✅ Define function to save data via fetch API */
+  function saveStopITData() {
+    console.log("✅ Saving STOP-IT Data...");
+
+    var requestBody = filter_data(); // Extract filtered data
+    console.log("📊 Filtered STOP-IT Data:", requestBody);
+    
+    // Convert to CSV if needed
+    var csvData = jsPsych.data.get().csv();
+
+    fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // Change to "text/csv" if needed
+        body: JSON.stringify({ 
+            participant_id: participantId, 
+            data: csvData // Sending CSV instead of JSON object
         })
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (error) {
-          console.error(error);
-        });
-    } catch (err) {
-      console.log("Save data function failed.", err);
-    }
-  }
+    })
+    .then(response => response.text())
+    .then(data => console.log("✅ Server Response:", data))
+    .catch(error => console.error("❌ Error saving STOP-IT response:", error));
+}
 
   /* Change 4: Defining necessary variables for saving the results */
   // experimental session-defining variables
   var task_id = "STOP-IT";
-  var sbj_id = "test01";
-
-  // YOU MUST GET YOUR OWN DROPBOX ACCESS TOKEN
-  var dropbox_access_token = '<PUT YOUR Dropbox ACCESS TOKEN HERE>';
-
-  // my preference is to include the task and sbj_id in the file name
-  var save_filename = '/' + task_id + '/' + task_id + '_' + sbj_id + '.csv';
+  var sbj_id = "participantId";
 
   // push all the procedures, which are defined in stop-it_main.js to the overall timeline
   var timeline = []; // this array stores the events we want to run in the experiment
@@ -230,11 +233,13 @@ Added `display_element`
 
     /* Change 6: Sending the results file upon completion */
     on_finish: function () {
-      save_data(dropbox_access_token, save_filename);
-    },
+      console.log("✅ Experiment finished, calling saveStopITData()");
+      saveStopITData();
+    }  // ✅ Removed the misplaced comma here
+  });
 
-  })
 </script>
+
 
 
 
