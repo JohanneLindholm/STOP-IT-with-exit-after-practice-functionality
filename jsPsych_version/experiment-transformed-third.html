@@ -130,48 +130,66 @@ var participantId = window.participantId;
     var ignore_columns = ['raw_rt', 'trial_type', 'first_stimulus', 'second_stimulus', 'onset_of_first_stimulus',
       'onset_of_second_stimulus', 'key_press', 'correct_response', 'trial_index', 'internal_node_id'
     ];
-    
+
     var rows = { trial_type: 'custom-stop-signal-plugin' };
     var selected_data = jsPsych.data.get().filter(rows).ignore(ignore_columns);
     var d = selected_data.values(); // Get trial data
 
-    // Define column order
     var arr = ['participant_id', 'block_i', 'trial_i', 'stim', 'signal', 'SSD', 'response', 'rt', 'correct',
       'focus', 'Fullscreen', 'time_elapsed', 'window_resolution'];
 
-    new_arr = []; // Array for formatted data
+    var new_arr = []; // Reformatted data array
 
     for (var i = 0; i < d.length; i++) {
-        var obj = d[i]; // Get one trial's data
-        var new_obj = { participant_id: participantId }; // Include participant ID
+        var obj = d[i]; // Extract trial
+        var new_obj = {};
 
-        arr.forEach(function(item) { 
-            new_obj[item] = obj[item]; 
+        arr.forEach(function(item) {
+            new_obj[item] = obj[item] || null; // Ensure no missing keys
         });
 
-        new_arr.push(new_obj); // Store formatted trial data
+        // Explicitly assign participant_id
+        new_obj['participant_id'] = window.participantId;
+
+        new_arr.push(new_obj);
     }
 
-    return new_arr; // Return structured data
+    console.log("✅ Filtered Data (First 5):", new_arr.slice(0, 5));
+    return new_arr;
 }
+
 
 
    /* ✅ Define function to save data via fetch API */
   function saveStopITData() {
     console.log("✅ Saving STOP-IT Data...");
 
-    var requestBody = filter_data(); // Extract filtered data
-    console.log("📊 Filtered STOP-IT Data:", requestBody);
+    var requestBody = filter_data(); // Get filtered data
+
+    if (!requestBody || requestBody.length === 0) {
+        console.error("❌ ERROR: No data to send!");
+        return;
+    }
+
+    // Check participant ID inside request body
+    var firstTrial = requestBody[0] || {};
+    console.log("🔍 First trial data (Before Sending):", firstTrial);
+
+    if (!firstTrial.participant_id || firstTrial.participant_id === "undefined") {
+        console.error("❌ ERROR: participant_id is missing in trials!");
+        return;
+    }
 
     fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)  // ✅ Send as a list of dictionaries
+        body: JSON.stringify(requestBody)
     })
-    .then(response => response.json())
+    .then(response => response.text())
     .then(data => console.log("✅ Server Response:", data))
     .catch(error => console.error("❌ Error saving STOP-IT response:", error));
 }
+
 
 
   /* Change 4: Defining necessary variables for saving the results */
