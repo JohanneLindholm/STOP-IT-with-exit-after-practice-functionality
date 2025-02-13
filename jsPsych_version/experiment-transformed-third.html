@@ -162,22 +162,17 @@ var participantId = window.participantId;
 
     var requestBody = filter_data(); // Extract filtered data
     console.log("📊 Filtered STOP-IT Data:", requestBody);
-    
-    // Convert to CSV if needed
-    var csvData = jsPsych.data.get().csv();
 
     fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, // Change to "text/csv" if needed
-        body: JSON.stringify({ 
-            participant_id: participantId, 
-            data: csvData // Sending CSV instead of JSON object
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)  // ✅ Send as a list of dictionaries
     })
-    .then(response => response.text())
+    .then(response => response.json())
     .then(data => console.log("✅ Server Response:", data))
     .catch(error => console.error("❌ Error saving STOP-IT response:", error));
 }
+
 
   /* Change 4: Defining necessary variables for saving the results */
   // experimental session-defining variables
