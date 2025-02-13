@@ -125,37 +125,36 @@ if (!window.hasOwnProperty("urlParams")) {
 var participantId = window.participantId;
 
      
-/*
-   * Helper functions for saving data
-   */
+  /* ✅ Helper function to filter data before saving */
   function filter_data() {
     var ignore_columns = ['raw_rt', 'trial_type', 'first_stimulus', 'second_stimulus', 'onset_of_first_stimulus',
       'onset_of_second_stimulus', 'key_press', 'correct_response', 'trial_index', 'internal_node_id'
     ];
-    var rows = {
-      trial_type: 'custom-stop-signal-plugin'
-    }; // we are only interested in our main stimulus, not fixation, feedback etc.
+    
+    var rows = { trial_type: 'custom-stop-signal-plugin' };
     var selected_data = jsPsych.data.get().filter(rows).ignore(ignore_columns);
-    // the next piece of codes orders the columns of the data file
-    var d = selected_data.values() // get the data values
-    // make an array that specifies the order of the object properties
-    var arr = ['block_i', 'trial_i', 'stim', 'signal', 'SSD', 'response', 'rt', 'correct',
-      'focus', 'Fullscreen', 'time_elapsed', 'window_resolution'
-    ];
-    new_arr = [] // we will fill this array with the ordered data
-    function myFunction(item) { // this is function is called in the arr.forEach call below
-      new_obj[item] = obj[item]
-      return new_obj
+    var d = selected_data.values(); // Get trial data
+
+    // Define column order
+    var arr = ['participant_id', 'block_i', 'trial_i', 'stim', 'signal', 'SSD', 'response', 'rt', 'correct',
+      'focus', 'Fullscreen', 'time_elapsed', 'window_resolution'];
+
+    new_arr = []; // Array for formatted data
+
+    for (var i = 0; i < d.length; i++) {
+        var obj = d[i]; // Get one trial's data
+        var new_obj = { participant_id: participantId }; // Include participant ID
+
+        arr.forEach(function(item) { 
+            new_obj[item] = obj[item]; 
+        });
+
+        new_arr.push(new_obj); // Store formatted trial data
     }
-    // do it for the whole data array
-    for (i = 0; i < d.length; i++) {
-      obj = d[i]; // get one row of data
-      new_obj = {};
-      arr.forEach(myFunction) // for each element in the array run my function
-      selected_data.values()[i] = new_obj; // insert the ordered values back in the jsPsych.data object
-    }
-    return selected_data;
-  }
+
+    return new_arr; // Return structured data
+}
+
 
    /* ✅ Define function to save data via fetch API */
   function saveStopITData() {
