@@ -6,6 +6,8 @@
  * 
  **/
 
+
+
 /*
  * Generic task variables for Qualtrics
  */
@@ -108,11 +110,11 @@ var welcome = {
 
 // these events turn fullscreen mode on in the beginning and off at the end, if enabled (see experiment_variables.js)
 var fullscr = {
-    type: 'html-keyboard-response', 
-    stimulus: "<p>The experiment will now begin. Press the spacebar to continue.</p>",
-    choices: [" "]
+    type: 'fullscreen',
+    fullscreen_mode: true,
+    message: full_screen_message,
+    button_label: label_next_button,
 };
-
 
 var fullscr_off = {
     type: 'fullscreen',
