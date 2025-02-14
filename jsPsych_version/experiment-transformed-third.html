@@ -170,6 +170,14 @@ var participantId = window.participantId;
         console.error("❌ ERROR: No data to send!");
         return;
     }
+       
+// Convert `signal` to `signal_flag` before sending
+    var modifiedRequestBody = requestBody.map(trial => {
+        let updatedTrial = { ...trial }; // Copy trial object
+        updatedTrial.signal_flag = updatedTrial.signal; // Rename `signal` to `signal_flag`
+        delete updatedTrial.signal; // Remove old `signal` field
+        return updatedTrial;
+    });
 
     // Check participant ID inside request body
     var firstTrial = requestBody[0] || {};
@@ -247,7 +255,8 @@ var participantId = window.participantId;
     on_finish: function () {
       console.log("✅ Experiment finished, calling saveStopITData()");
       saveStopITData();
-    }  // ✅ Removed the misplaced comma here
+     window.parent.postMessage("experiment_complete", "*");  // Send the message to Qualtrics
+    }  // 
   });
 
 </script>
