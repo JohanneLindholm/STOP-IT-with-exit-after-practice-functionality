@@ -255,7 +255,7 @@ var participantId = window.participantId;
     on_finish: function () {
       console.log("✅ Experiment finished, calling saveStopITData()");
       saveStopITData();
-     window.parent.postMessage("experiment_complete", "*");  // Send the message to Qualtrics
+     window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com"); // Send the message to Qualtrics
     }  // 
   });
 
