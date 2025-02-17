@@ -253,23 +253,11 @@ var participantId = window.participantId;
 
     /* Change 6: Sending the results file upon completion */
     on_finish: function () {
-    console.log("✅ Experiment finished, calling saveStopITData()");
-    saveStopITData();
-
-    // Delay message sending to ensure it's received
-    setTimeout(() => {
-        console.log("📡 Attempting to send experiment_complete message...");
-        
-        if (window.parent) {
-            console.log("✅ window.parent exists, sending message...");
-            window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com");
-        } else {
-            console.error("❌ ERROR: window.parent is undefined!");
-        }
-    }, 2000);  // 2-second delay
-    
-    } // <-- Added missing closing brace
-}); // <-- Ensure `jsPsych.init()` is closed properly
+      console.log("✅ Experiment finished, calling saveStopITData()");
+      saveStopITData();
+     window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com"); // Send the message to Qualtrics
+    }  // 
+  });
 
 </script>
 
