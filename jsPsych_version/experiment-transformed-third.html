@@ -267,7 +267,9 @@ var participantId = window.participantId;
             console.error("❌ ERROR: window.parent is undefined!");
         }
     }, 2000);  // 2-second delay
-}
+    
+    } // <-- Added missing closing brace
+}); // <-- Ensure `jsPsych.init()` is closed properly
 
 </script>
 
