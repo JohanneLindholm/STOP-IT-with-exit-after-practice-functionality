@@ -263,11 +263,10 @@ on_finish: function () {
         saveStopITData();
     }
     window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com");
-} // <-- this closes the function!
+} // <-- closes the on_finish function
+
+}); // <-- closes the jsPsych.init({...}) call
 
 </script>
-
-
-
-
 </html>
+
