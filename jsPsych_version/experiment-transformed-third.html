@@ -257,14 +257,14 @@ var participantId = window.participantId;
     },
 
 
-/* Change 6: Sending the results file upon completion */
-     on_finish: function () {
-  if (!window.stopped_early) {        // <-- ONLY SEND IF NOT SKIPPED
-      console.log("✅ Experiment finished, calling saveStopITData()");
-      saveStopITData();
-  }
-  window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com");
-}
+on_finish: function () {
+    if (!window.stopped_early) {
+        console.log("✅ Experiment finished, calling saveStopITData()");
+        saveStopITData();
+    }
+    window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com");
+} // <-- this closes the function!
+
 </script>
 
 
