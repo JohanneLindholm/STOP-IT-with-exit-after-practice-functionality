@@ -98,13 +98,7 @@ if (flag_debug) {
 
 var welcome = {
     type: 'html-button-response',
-    stimulus: `
-        <div style="max-width:700px;margin:auto;text-align:center;">
-        <p>Welcome to the reaction time task. It takes about 8 minutes, and while there will be short breaks between trials, please ensure you can stay focused and undisturbed throughout.</p>
-        <p>If you do not wish to take part in this section, you may skip it and continue with the rest of the survey.</p>
-        </div>
-    `,
-    choices: ['Start task', 'Skip and continue survey'],
+    choices: ['Start reaction time task', 'Skip and continue with the rest of the survey'],
     on_finish: function(data){
         if(data.button_pressed == 1){
             // "Skip" pressed: Mark as skipped and end experiment
@@ -116,7 +110,7 @@ var welcome = {
                     stopit_status: "skipped_intro"
                 })
             });
-            jsPsych.endExperiment("Thank you! You may now continue with the rest of the survey.");
+            jsPsych.endExperiment;
         }
         // If "Start task" pressed, experiment proceeds as usual
     }
