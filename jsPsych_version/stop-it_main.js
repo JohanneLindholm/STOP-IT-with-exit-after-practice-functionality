@@ -103,6 +103,7 @@ var welcome = {
     choices: ['Start reaction time task', 'Skip and continue with the rest of the survey'],
     on_finish: function(data){
         if(data.button_pressed == 1){
+            window.stopped_early = true;  // <-- add this
             // "Skip" pressed: Mark as skipped and end experiment
             fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
                 method: "POST",
