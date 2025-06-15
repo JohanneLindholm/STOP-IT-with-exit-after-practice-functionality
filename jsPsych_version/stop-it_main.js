@@ -96,15 +96,29 @@ if (flag_debug) {
   Define the individual events/trials that make up the experiment
 ######################################################################### */
 
-// welcome message trial. Also: end the experiment if browser is not Chrome or Firefox
 var welcome = {
-    type: "instructions",
-    pages: welcome_message,
-    show_clickable_nav: true,
-    allow_backward: false,
-    button_label_next: label_next_button,
-    on_start: function (trial) {
-        trial.pages = welcome_message;
+    type: 'html-button-response',
+    stimulus: `
+        <div style="max-width:700px;margin:auto;text-align:center;">
+        <p>Welcome to the reaction time task. It takes about 8 minutes, and while there will be short breaks between trials, please ensure you can stay focused and undisturbed throughout.</p>
+        <p>If you do not wish to take part in this section, you may skip it and continue with the rest of the survey.</p>
+        </div>
+    `,
+    choices: ['Start task', 'Skip and continue survey'],
+    on_finish: function(data){
+        if(data.button_pressed == 1){
+            // "Skip" pressed: Mark as skipped and end experiment
+            fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    participant_id: window.participantId,
+                    stopit_status: "skipped_intro"
+                })
+            });
+            jsPsych.endExperiment("Thank you! You may now continue with the rest of the survey.");
+        }
+        // If "Start task" pressed, experiment proceeds as usual
     }
 };
 
