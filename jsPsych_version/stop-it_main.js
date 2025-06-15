@@ -147,9 +147,26 @@ var instructions = {
 // start of each block
 // the start message is declared in the configuration/text_variables.js file
 var block_start = {
-    type: 'html-keyboard-response',
-    stimulus: text_at_start_block,
-    choices: ['space']
+    type: 'html-button-response',
+    stimulus: '<p>Ready to begin the next block?</p>',
+    choices: ['Begin the reaction time game', 'Skip this section and continue the survey'],
+    on_finish: function(data){
+        if(data.button_pressed == 1){
+            window.stopped_early = true;
+            // You can include block_ind if you want to log at which block opt-out occurred
+            fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    participant_id: window.participantId,
+                    stopit_status: "skipped_block_start",
+                    block_index: window.block_ind || 0 // Optional: log block
+                })
+            });
+            jsPsych.endExperiment("Thank you! You may now continue with the rest of the survey.");
+        }
+        // If "Begin..." is pressed, proceed as usual
+    }
 };
 
 // get ready for beginning of block
@@ -300,13 +317,21 @@ var trial_feedback = {
         }
     }
 };
-
+// at the end of the block, give feedback on performance
 var block_feedback = {
-    type: 'html-button-response',
-    trial_duration: bFBT, // Optional: set to null for no auto-advance
-    choices: ['Continue', 'Exit and continue survey'],
+    type: 'html-keyboard-response',
+    trial_duration: bFBT,
+
+    choices: function () {
+        if (block_ind == NexpBL) {
+            return ['p', 'space']
+        } else {
+            return ['p'] // 'p' can be used to skip the feedback, useful for debugging
+        }
+    },
+
     stimulus: function () {
-        // Same feedback calculation as before
+        // calculate performance measures
         var ns_trials = jsPsych.data.get().filter({
             trial_type: 'custom-stop-signal-plugin',
             block_i: block_ind,
@@ -318,12 +343,15 @@ var block_feedback = {
         }).mean());
 
         var prop_ns_Correct = Math.round(ns_trials.filter({
-            correct: true
-        }).count() / ns_trials.count() * 1000) / 1000;
+                correct: true
+            }).count() / ns_trials.count() * 1000) /
+            1000; // unhandy multiplying and dividing by 1000 necessary to round to two decimals
 
         var prop_ns_Missed = Math.round(ns_trials.filter({
             key_press: null
         }).count() / ns_trials.count() * 1000) / 1000;
+
+        var prop_ns_Incorrect = Math.round((1 - (prop_ns_Correct + prop_ns_Missed)) * 1000) / 1000;
 
         var ss_trials = jsPsych.data.get().filter({
             trial_type: 'custom-stop-signal-plugin',
@@ -335,8 +363,25 @@ var block_feedback = {
             correct: true
         }).count() / ss_trials.count() * 1000) / 1000;
 
-        var next_block_text = (block_ind == NexpBL) ? final_block_msg : next_block_msg;
+        // in the last block, we should not say that there will be a next block
+        if (block_ind == NexpBL) {
+            var next_block_text = final_block_msg
+        } else { // make a countdown timer
+            var count = (bFBT / 1000);
+            var counter;
+            clearInterval(counter);
+            counter = setInterval(timer, 1000); //1000 will run it every 1 second
+            function timer() {
+                count = count - 1;
+                if (count <= 0) {
+                    clearInterval(counter);
+                }
+                document.getElementById("timer").innerHTML = count;
+            }
+            var next_block_text = next_block_msg // insert countdown timer
+        }
 
+        // the final text to present. Can also show correct and incorrect proportions if requested.
         return [
             no_signal_header +
             sprintf(avg_rt_msg, avg_nsRT) +
@@ -346,22 +391,10 @@ var block_feedback = {
             next_block_text
         ]
     },
-    on_finish: function(data){
-        // If "Exit" is chosen (button 1), send marker to backend and end experiment
-        if(data.button_pressed == 1){
-            fetch("https://DecisionLab.eu.pythonanywhere.com/save-stopit-response", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    participant_id: window.participantId,
-                    stopit_status: "exited_via_block_feedback"
-                })
-            });
-            jsPsych.endExperiment("Thank you for trying the task. You may now continue with the rest of the survey.");
-        }
-        // Else, continue as before
-        trial_ind = 1;
-        block_ind = block_ind + 1;
+
+    on_finish: function () {
+        trial_ind = 1; // reset trial counter
+        block_ind = block_ind + 1; // next block
     }
 };
 
