@@ -374,9 +374,9 @@ combine trials in procedures (create nested timeline)
 #########################################################################*/
 
 if (fullscreen) {
-    var start_timeline = [fullscr, instructions]
+    var start_timeline = [welcome, fullscr, instructions];
 } else {
-    var start_timeline = [instructions]
+    var start_timeline = [welcome, instructions];
 }
 
 // start the experiment with the previously defined start_timeline trials
