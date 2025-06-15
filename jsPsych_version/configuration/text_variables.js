@@ -44,7 +44,9 @@ final_block_msg = "<p>Press space to continue...</p>" // after the final block t
 var label_previous_button = 'Previous';
 var label_next_button = 'Next';
 var label_consent_button = 'I agree';
-var full_screen_message = '<p>Welcome to the reaction time task — it takes about 8 minutes, and while there will be short breaks between trials, please ensure you can stay focused and undisturbed throughout. </p>' '<p> If you do not wish to take part in this section, you may skip it and continue with the rest of the survey.</p>';
+var full_screen_message = 
+  '<p>Welcome to the reaction time task — it takes about 8 minutes, and while there will be short breaks between trials, please ensure you can stay focused and undisturbed throughout. </p>' +
+  '<p>If you do not wish to take part in this section, you may skip it and continue with the rest of the survey.</p>';
 var welcome_message = ['<p>Welcome to the experiment.</p>' + '<p>Press "Next" to begin.</p>'];
 var not_supported_message = ['<p>This experiment requires the Chrome or Firefox webbrowser.</p>'];
 var subjID_instructions = "Enter your participant ID."
