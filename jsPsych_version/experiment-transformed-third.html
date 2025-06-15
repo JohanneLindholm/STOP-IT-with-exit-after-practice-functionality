@@ -211,6 +211,9 @@ var participantId = window.participantId;
   var timeline = []; // this array stores the events we want to run in the experiment
   timeline.push(start_procedure, block_procedure, end_procedure);
 
+  // Marker to indicate if the participant opted out
+  window.stopped_early = false;
+
   // run the experiment!
   jsPsych.init({
 
@@ -252,14 +255,16 @@ var participantId = window.participantId;
       min_width: minWidth,
       min_height: minHeight
     },
+
+
 /* Change 6: Sending the results file upon completion */
-    on_finish: function () {
+     on_finish: function () {
+  if (!window.stopped_early) {        // <-- ONLY SEND IF NOT SKIPPED
       console.log("✅ Experiment finished, calling saveStopITData()");
       saveStopITData();
-     window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com"); // Send the message to Qualtrics
-    }  // 
-  });
-
+  }
+  window.parent.postMessage("experiment_complete", "https://copenhagenbusiness.eu.qualtrics.com");
+}
 </script>
 
 
